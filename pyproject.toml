@@ -1,14 +1,14 @@
 [project]
 name = "lodin"
+version = "0.0.1"
 authors = [
     { name = "Lodin", email = "apps@effyis-partners.ma"}
 ]
 description = "Solution de Paiement pour ERPNext"
 requires-python = ">=3.10"
 readme = "README.md"
-dynamic = ["version"]
 dependencies = [
-    "frappe>=15.0.0 <16.0.0"
+    "frappe >=15.0.0, <16.0.0"
 ]
 
 [build-system]
