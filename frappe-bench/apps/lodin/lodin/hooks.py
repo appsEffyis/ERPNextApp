@@ -5,7 +5,7 @@ app_description = "Solution de Paiement pour ERPNext"
 app_email = "apps@effyis-partners.ma"
 app_license = "mit"
 app_version = "0.0.1"
-required_apps = ["frappe>=15.0.0 <16.0.0"]
+app_required_frappe_version = ">=15.0.0 <16.0.0"
 
 # Apps
 # ------------------
