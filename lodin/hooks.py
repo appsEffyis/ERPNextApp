@@ -4,6 +4,7 @@ app_publisher = "Lodin"
 app_description = "Solution de Paiement pour ERPNext"
 app_email = "apps@effyis-partners.ma"
 app_license = "mit"
+app_version = "0.0.1"
 
 # Apps
 # ------------------
