@@ -1,0 +1,22 @@
+# Python
+**/__pycache__/
+**/*.pyc
+frappe-bench/env/
+
+# Node / JS
+**/node_modules/
+frappe-bench/sites/assets/
+
+# Data & Logs
+frappe-bench/logs/*
+frappe-bench/sites/*/site_config.json
+db-data/
+*.sql
+
+# Frappe / ERPNext Core (on ne push pas le code standard)
+frappe-bench/apps/frappe/
+frappe-bench/apps/erpnext/
+
+# Divers
+.DS_Store
+.vscode/
