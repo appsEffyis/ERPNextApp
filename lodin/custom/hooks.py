@@ -1,10 +1,9 @@
-app_name = "lodin"
-app_title = "Lodin"
-app_publisher = "Lodin"
-app_description = "Solution de Paiement pour ERPNext"
-app_email = "apps@effyis-partners.ma"
+app_name = "payment_link"
+app_title = "Payment Link"
+app_publisher = "Moi"
+app_description = "Lien de paiement"
+app_email = "ton@email.com"
 app_license = "mit"
-app_version = "1.0.0" 
 
 # Apps
 # ------------------
@@ -14,11 +13,11 @@ app_version = "1.0.0"
 # Each item in the list will be shown as an app in the apps page
 # add_to_apps_screen = [
 # 	{
-# 		"name": "lodin",
-# 		"logo": "/assets/lodin/logo.png",
-# 		"title": "Lodin",
-# 		"route": "/lodin",
-# 		"has_permission": "lodin.api.permission.has_app_permission"
+# 		"name": "payment_link",
+# 		"logo": "/assets/payment_link/logo.png",
+# 		"title": "Payment Link",
+# 		"route": "/payment_link",
+# 		"has_permission": "payment_link.api.permission.has_app_permission"
 # 	}
 # ]
 
@@ -26,15 +25,15 @@ app_version = "1.0.0"
 # ------------------
 
 # include js, css files in header of desk.html
-# app_include_css = "/assets/lodin/css/lodin.css"
-# app_include_js = "/assets/lodin/js/lodin.js"
+# app_include_css = "/assets/payment_link/css/payment_link.css"
+# app_include_js = "/assets/payment_link/js/payment_link.js"
 
 # include js, css files in header of web template
-# web_include_css = "/assets/lodin/css/lodin.css"
-# web_include_js = "/assets/lodin/js/lodin.js"
+# web_include_css = "/assets/payment_link/css/payment_link.css"
+# web_include_js = "/assets/payment_link/js/payment_link.js"
 
 # include custom scss in every website theme (without file extension ".scss")
-# website_theme_scss = "lodin/public/scss/website"
+# website_theme_scss = "payment_link/public/scss/website"
 
 # include js, css files in header of web form
 # webform_include_js = {"doctype": "public/js/doctype.js"}
@@ -52,7 +51,7 @@ app_version = "1.0.0"
 # Svg Icons
 # ------------------
 # include app icons in desk
-# app_include_icons = "lodin/public/icons.svg"
+# app_include_icons = "payment_link/public/icons.svg"
 
 # Home Pages
 # ----------
@@ -76,43 +75,45 @@ app_version = "1.0.0"
 
 # add methods and filters to jinja environment
 # jinja = {
-# 	"methods": "lodin.utils.jinja_methods",
-# 	"filters": "lodin.utils.jinja_filters"
+# 	"methods": "payment_link.utils.jinja_methods",
+# 	"filters": "payment_link.utils.jinja_filters"
 # }
 
 # Installation
 # ------------
 
-# before_install = "lodin.install.before_install"
-# after_install = "lodin.install.after_install"
+# before_install = "payment_link.install.before_install"
+#after_migrate = "payment_link.custom.install_custom_fields.install"
+#after_install = "payment_link.custom.install_custom_fields.install"
+
 
 # Uninstallation
 # ------------
 
-# before_uninstall = "lodin.uninstall.before_uninstall"
-# after_uninstall = "lodin.uninstall.after_uninstall"
+# before_uninstall = "payment_link.uninstall.before_uninstall"
+# after_uninstall = "payment_link.uninstall.after_uninstall"
 
 # Integration Setup
 # ------------------
 # To set up dependencies/integrations with other apps
 # Name of the app being installed is passed as an argument
 
-# before_app_install = "lodin.utils.before_app_install"
-# after_app_install = "lodin.utils.after_app_install"
+# before_app_install = "payment_link.utils.before_app_install"
+# after_app_install = "payment_link.utils.after_app_install"
 
 # Integration Cleanup
 # -------------------
 # To clean up dependencies/integrations with other apps
 # Name of the app being uninstalled is passed as an argument
 
-# before_app_uninstall = "lodin.utils.before_app_uninstall"
-# after_app_uninstall = "lodin.utils.after_app_uninstall"
+# before_app_uninstall = "payment_link.utils.before_app_uninstall"
+# after_app_uninstall = "payment_link.utils.after_app_uninstall"
 
 # Desk Notifications
 # ------------------
 # See frappe.core.notifications.get_notification_config
 
-# notification_config = "lodin.notifications.get_notification_config"
+# notification_config = "payment_link.notifications.get_notification_config"
 
 # Permissions
 # -----------
@@ -151,39 +152,39 @@ app_version = "1.0.0"
 
 # scheduler_events = {
 # 	"all": [
-# 		"lodin.tasks.all"
+# 		"payment_link.tasks.all"
 # 	],
 # 	"daily": [
-# 		"lodin.tasks.daily"
+# 		"payment_link.tasks.daily"
 # 	],
 # 	"hourly": [
-# 		"lodin.tasks.hourly"
+# 		"payment_link.tasks.hourly"
 # 	],
 # 	"weekly": [
-# 		"lodin.tasks.weekly"
+# 		"payment_link.tasks.weekly"
 # 	],
 # 	"monthly": [
-# 		"lodin.tasks.monthly"
+# 		"payment_link.tasks.monthly"
 # 	],
 # }
 
 # Testing
 # -------
 
-# before_tests = "lodin.install.before_tests"
+# before_tests = "payment_link.install.before_tests"
 
 # Overriding Methods
 # ------------------------------
 #
 # override_whitelisted_methods = {
-# 	"frappe.desk.doctype.event.event.get_events": "lodin.event.get_events"
+# 	"frappe.desk.doctype.event.event.get_events": "payment_link.event.get_events"
 # }
 #
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
 # along with any modifications made in other Frappe apps
 # override_doctype_dashboards = {
-# 	"Task": "lodin.task.get_dashboard_data"
+# 	"Task": "payment_link.task.get_dashboard_data"
 # }
 
 # exempt linked doctypes from being automatically cancelled
@@ -197,13 +198,13 @@ app_version = "1.0.0"
 
 # Request Events
 # ----------------
-# before_request = ["lodin.utils.before_request"]
-# after_request = ["lodin.utils.after_request"]
+# before_request = ["payment_link.utils.before_request"]
+# after_request = ["payment_link.utils.after_request"]
 
 # Job Events
 # ----------
-# before_job = ["lodin.utils.before_job"]
-# after_job = ["lodin.utils.after_job"]
+# before_job = ["payment_link.utils.before_job"]
+# after_job = ["payment_link.utils.after_job"]
 
 # User Data Protection
 # --------------------
@@ -233,7 +234,7 @@ app_version = "1.0.0"
 # --------------------------------
 
 # auth_hooks = [
-# 	"lodin.auth.validate"
+# 	"payment_link.auth.validate"
 # ]
 
 # Automatically update python controller files with type annotations for this app.
@@ -247,16 +248,17 @@ app_version = "1.0.0"
 # ------------
 # List of apps whose translatable strings should be excluded from this app's translations.
 # ignore_translatable_strings_from = []
+# Lien vers la fonction de création de champ au moment de l'installation
+# Lien vers la logique avant sauvegarde
+after_migrate = "payment_link.custom.install_custom_fields.install"
+after_install = "payment_link.custom.install_custom_fields.install"
 
-after_migrate = "lodin.custom.install_custom_fields.install"
-after_install = "lodin.custom.install_custom_fields.install"
-
+# 2. Corrige le chemin (enleve le doublon payment_link.payment_link)
 doc_events = {
     "Sales Invoice": {
-        "on_submit": "lodin.custom.sales_invoice.on_submit",
+        "on_submit": "payment_link.custom.sales_invoice.on_submit",
     }
 }
-
 doctype_js = {
     "Sales Invoice": "public/js/sales_invoice_custom.js"
 }
