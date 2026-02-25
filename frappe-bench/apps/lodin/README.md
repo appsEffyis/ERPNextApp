@@ -1,33 +1,21 @@
-### Lodin
+# LodinPay Integration for ERPNext
 
-Solution de Paiement pour ERPNext
+Cette application permet d'intégrer la passerelle de paiement **LodinPay** au sein d'ERPNext v15. Elle automatise la génération de liens de paiement sécurisés et la synchronisation des statuts de facturation.
 
-### Installation
+## Fonctionnalités principales
 
-You can install this app using the [bench](https://github.com/frappe/bench) CLI:
+- 🔗 **Génération automatique de liens RTP** (Request To Pay) lors de la soumission d'une facture.
+- 📄 **Synchronisation des PDF** : Envoi automatique de la facture au format PDF vers le backend LodinPay.
+- 📱 **QR Code dynamique** : Affichage d'un QR Code carré sur la facture pour un paiement mobile instantané.
+- 🔄 **Vérification en temps réel** : Bouton de synchronisation pour mettre à jour le statut de la facture (`Unpaid` ⮕ `Paid`) dès que le paiement est confirmé.
+- 🛡️ **Sécurité** : Signature des transactions via HMAC-SHA256.
 
-```bash
-cd $PATH_TO_YOUR_BENCH
-bench get-app $URL_OF_THIS_REPO --branch develop
-bench install-app lodin
-```
+## Installation
 
-### Contributing
-
-This app uses `pre-commit` for code formatting and linting. Please [install pre-commit](https://pre-commit.com/#installation) and enable it for this repository:
+Vous pouvez installer cette application en utilisant la CLI [bench](https://github.com/frappe/bench) :
 
 ```bash
-cd apps/lodin
-pre-commit install
-```
-
-Pre-commit is configured to use the following tools for checking and formatting your code:
-
-- ruff
-- eslint
-- prettier
-- pyupgrade
-
-### License
-
-mit
+cd frappe-bench
+bench get-app https://github.com/appsEffyis/ERPNextApp.git --branch app
+bench --site [votre-site] install-app lodin
+bench --site [votre-site] migrate
