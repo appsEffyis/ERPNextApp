@@ -25,6 +25,7 @@ services:
       - ./frappe-bench:/home/frappe/frappe-bench
     ports:
       - "8000:8000"
+      - "9000:9000" 
     stdin_open: true
     tty: true
     # On force l'utilisateur frappe pour éviter les soucis de droits

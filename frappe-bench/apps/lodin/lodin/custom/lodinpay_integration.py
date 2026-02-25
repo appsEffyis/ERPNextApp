@@ -14,9 +14,9 @@ from datetime import datetime, timezone
 
 
 
-RTP_API_URL = "https://api-preprod.lodinpay.com/merchant-service/extensions/pay/rtp"
-INVOICE_API_URL = "https://api-preprod.lodinpay.com/merchant-service/extensions/invoices"
-RTP_STATUS_API = "https://api-preprod.lodinpay.com/merchant-service/extensions/pay/rtp/check-status"
+RTP_API_URL = "https://api.lodinpay.com/merchant-service/extensions/pay/rtp"
+INVOICE_API_URL = "https://api.lodinpay.com/merchant-service/extensions/invoices"
+RTP_STATUS_API = "https://api.lodinpay.com/merchant-service/extensions/pay/rtp/check-status"
 EXTENSION_CODE = "ERPNEXT"
 
 

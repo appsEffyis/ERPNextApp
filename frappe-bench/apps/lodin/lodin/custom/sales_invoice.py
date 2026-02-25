@@ -31,11 +31,11 @@ def on_submit(doc, method):
     try:
         frappe.logger().info(f"===== LODINPAY PROCESS START invoice={doc.name} =====")
         
-        # 1️⃣ GÉNÉRATION DU LIEN (Uniquement si pas déjà fait)
+        
         if not doc.lodinpay_order_id:
             rtp_data = generate_rtp(doc, client_id, client_secret)
             
-            # On enregistre IMMÉDIATEMENT
+            
             doc.db_set('rtp_payment_link', rtp_data.get("url"), update_modified=False)
             doc.db_set('lodinpay_order_id', str(rtp_data.get("orderId")), update_modified=False)
             
