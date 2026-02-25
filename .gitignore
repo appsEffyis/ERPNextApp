@@ -20,3 +20,6 @@ frappe-bench/apps/erpnext/
 # Divers
 .DS_Store
 .vscode/
+
+# Logs Frappe
+frappe-bench/sites/*/logs/
