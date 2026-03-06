@@ -11,7 +11,6 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
-      # MariaDB est nécessaire pour la DB
       mariadb:
         image: mariadb:10.6
         env:
@@ -20,7 +19,6 @@ jobs:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
       
-      # REDIS EST OBLIGATOIRE pour Frappe
       redis-cache:
         image: redis:6.2-alpine
         ports:
@@ -28,7 +26,7 @@ jobs:
       redis-queue:
         image: redis:6.2-alpine
         ports:
-          - 6380:6379 # On décale le port pour éviter le conflit
+          - 6380:6379
 
     steps:
       - uses: actions/checkout@v4
@@ -36,7 +34,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11" # Version recommandée pour v15
+          python-version: "3.11"
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -54,9 +52,9 @@ jobs:
 
       - name: Init Bench
         run: |
-          bench init frappe-bench --skip-redis-config-generation --frappe-branch version-15 --python python3.11
+          # --skip-assets permet de gagner bcp de temps en CI
+          bench init frappe-bench --skip-redis-config-generation --frappe-branch version-15 --python python3.11 --skip-assets
           cd frappe-bench
-          # Configurer bench pour utiliser les services redis du host
           bench set-config -g redis_cache redis://localhost:6379
           bench set-config -g redis_queue redis://localhost:6380
 
@@ -67,20 +65,18 @@ jobs:
           bench get-app lodin ${{ github.workspace }}
 
       - name: Setup Site
-              run: |
-                cd frappe-bench
-                # Création du site
-                bench new-site lodin.localhost \
-                  --db-host 127.0.0.1 \
-                  --mariadb-root-password root \
-                  --admin-password admin \
-                  --no-mariadb-socket
-                
-                # 1. INSTALLER ERPNEXT EN PREMIER (Indispensable pour avoir Sales Invoice)
-                bench --site lodin.localhost install-app erpnext
-                
-                # 2. INSTALLER LODIN ENSUITE
-                bench --site lodin.localhost install-app lodin
+        run: |
+          cd frappe-bench
+          # Remplacement de --no-mariadb-socket par la nouvelle norme de scope
+          bench new-site lodin.localhost \
+            --db-host 127.0.0.1 \
+            --mariadb-root-password root \
+            --admin-password admin \
+            --mariadb-user-host-login-scope='%'
+          
+          # Ordre crucial : ERPNext d'abord, Lodin ensuite
+          bench --site lodin.localhost install-app erpnext
+          bench --site lodin.localhost install-app lodin
 
       - name: Run Tests
         run: |
