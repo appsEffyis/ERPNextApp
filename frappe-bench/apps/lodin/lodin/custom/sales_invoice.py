@@ -25,14 +25,14 @@ def on_submit(doc, method):
     try:
         frappe.logger().info(f"===== LODINPAY PROCESS START invoice={doc.name} =====")
 
-        # ✅ Double check en base au cas où doc en mémoire n'est pas à jour
+        
         lodinpay_order_id = frappe.db.get_value("Sales Invoice", doc.name, "lodinpay_order_id")
 
         if lodinpay_order_id:
             frappe.logger().info(f"LodinPay already processed for {doc.name}")
             return
 
-        # 1️⃣ GÉNÉRATION DU RTP
+        
         access_log_id = None
         try:
             rtp_data = generate_rtp(doc, client_id, client_secret)
@@ -43,10 +43,10 @@ def on_submit(doc, method):
         except Exception as e:
             if "already exists" in str(e).lower():
                 frappe.logger().info(f"RTP already exists for {doc.name}, skipping silently.")
-                return  # ✅ Sort proprement sans message d'erreur
+                return  
             raise e
 
-# 2️⃣ ENVOI DES DONNÉES JSON
+
         backend_invoice_id = None
         try:
             invoice_response = send_invoice_to_backend(doc, client_id, client_secret, access_log_id)
@@ -57,7 +57,7 @@ def on_submit(doc, method):
             else:
                 raise e
 
-        # 3️⃣ ENVOI DU PDF
+        
         if backend_invoice_id:
             send_invoice_pdf_to_backend(doc, backend_invoice_id)
             frappe.logger().info(f"✅ LODINPAY FULL SYNC DONE invoice={doc.name}")
