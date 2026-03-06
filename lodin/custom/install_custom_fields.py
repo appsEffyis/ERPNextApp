@@ -35,7 +35,7 @@ def install():
     
     create_custom_fields(custom_fields, update=True)
     set_default_print_format()
-    frappe.db.commit()
+    frappe.db.commit() # nosemgrep - required after custom field installation
     
     print("✅ LodinPay custom fields created successfully!")
 
@@ -43,5 +43,5 @@ def install():
 def set_default_print_format():
     """Définit LodinPay Invoice Format comme format par défaut pour Sales Invoice"""
     frappe.db.set_value("DocType", "Sales Invoice", "default_print_format", "LodinPay Invoice Format")
-    frappe.db.commit()
+    frappe.db.commit() # nosemgrep - required after custom field installation
     print("✅ LodinPay Invoice Format est maintenant le format par défaut.")
