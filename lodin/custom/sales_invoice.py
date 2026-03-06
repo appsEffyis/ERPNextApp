@@ -1,5 +1,6 @@
 import frappe
 
+
 def on_submit(doc, method):
     if doc.currency != "EUR":
         frappe.msgprint(
@@ -11,8 +12,8 @@ def on_submit(doc, method):
 
     from lodin.custom.lodinpay_integration import (
         generate_rtp,
+        send_invoice_pdf_to_backend,
         send_invoice_to_backend,
-        send_invoice_pdf_to_backend
     )
 
     client_id = frappe.db.get_single_value("LodinPay Settings", "client_id")
@@ -25,14 +26,14 @@ def on_submit(doc, method):
     try:
         frappe.logger().info(f"===== LODINPAY PROCESS START invoice={doc.name} =====")
 
-    
+
         lodinpay_order_id = frappe.db.get_value("Sales Invoice", doc.name, "lodinpay_order_id")
 
         if lodinpay_order_id:
             frappe.logger().info(f"LodinPay already processed for {doc.name}")
             return
 
-        
+
         access_log_id = None
         try:
             rtp_data = generate_rtp(doc, client_id, client_secret)
@@ -43,7 +44,7 @@ def on_submit(doc, method):
         except Exception as e:
             if "already exists" in str(e).lower():
                 frappe.logger().info(f"RTP already exists for {doc.name}, skipping silently.")
-                return  
+                return
             raise e
 
 
@@ -57,7 +58,7 @@ def on_submit(doc, method):
             else:
                 raise e
 
-        
+
         if backend_invoice_id:
             send_invoice_pdf_to_backend(doc, backend_invoice_id)
             frappe.logger().info(f"✅ LODINPAY FULL SYNC DONE invoice={doc.name}")
@@ -67,4 +68,4 @@ def on_submit(doc, method):
     except (Exception, frappe.ValidationError) as e:
         frappe.logger().exception(f"LodinPay process failed for invoice {doc.name}")
         if "already exists" not in str(e).lower():
-            frappe.msgprint(f"Erreur LodinPay: {str(e)}", indicator="red")
+            frappe.msgprint(f"Erreur LodinPay: {e!s}", indicator="red")

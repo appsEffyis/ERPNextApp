@@ -1,18 +1,15 @@
+import base64
+import hashlib
+import hmac
 import json
+import time
+from datetime import datetime, timezone
+from decimal import ROUND_HALF_UP, Decimal
+
 import frappe
 import requests
-import time  
-import base64
-import hmac
-import hashlib
 from frappe import _
-from frappe.utils import now_datetime, get_datetime, nowdate
-from decimal import Decimal, ROUND_HALF_UP
-from datetime import datetime, timezone
-
-
-
-
+from frappe.utils import get_datetime, now_datetime, nowdate
 
 RTP_API_URL = "https://api-preprod.lodinpay.com/merchant-service/extensions/pay/rtp"
 INVOICE_API_URL = "https://api-preprod.lodinpay.com/merchant-service/extensions/invoices"
@@ -24,39 +21,39 @@ EXTENSION_CODE = "ERPNEXT"
 
 # RTP GENERATION
 def generate_rtp(doc, client_id, client_secret):
-    
+
     invoice_id = doc.name.strip()
-    
+
     # Normalized amount
     canonical_amount = (
         Decimal(str(doc.grand_total))
         .quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
         .to_eng_string()
     )
-    
-    
+
+
     timestamp = datetime.now(timezone.utc)\
         .isoformat(timespec="milliseconds")\
         .replace("+00:00", "Z")
-    
-    
+
+
     client_id = client_id.strip()
     client_secret = client_secret.strip()
     invoice_id = invoice_id.strip()
-    
-    
+
+
     payload = client_id + timestamp + canonical_amount + invoice_id
     signature = sign_payload(payload, client_secret)
-    
-    
-    frappe.logger().info(f"=== DEBUG ===")
+
+
+    frappe.logger().info("=== DEBUG ===")
     frappe.logger().info(f"client_id  : '{client_id}'")
     frappe.logger().info(f"timestamp  : '{timestamp}'")
     frappe.logger().info(f"amount     : '{canonical_amount}'")
     frappe.logger().info(f"invoice_id : '{invoice_id}'")
     frappe.logger().info(f"payload    : '{payload}'")
     frappe.logger().info(f"signature  : '{signature}'")
-    
+
     headers = {
         "Content-Type": "application/json",
         "X-Client-Id": client_id,
@@ -64,16 +61,16 @@ def generate_rtp(doc, client_id, client_secret):
         "X-Signature": signature,
         "X-Extension-Code": EXTENSION_CODE,
     }
-    
+
     body = {
         "amount": float(canonical_amount),
         "invoiceId": invoice_id,
         "paymentType": "INST",
         "description": f"Invoice {invoice_id}",
     }
-    
+
     r = requests.post(RTP_API_URL, json=body, headers=headers, timeout=20)
-    
+
     if r.status_code != 200:
         frappe.logger().error(f"❌ RTP error {r.status_code}: {r.text}")
         frappe.throw(f"Failed to generate RTP: {r.text}")
@@ -85,7 +82,7 @@ def generate_rtp(doc, client_id, client_secret):
 def send_invoice_to_backend(doc, client_id, client_secret, access_log_id):
     """Envoie les données de la facture à LodinPay"""
     invoice_number = doc.name.strip()
-    
+
     items = []
     for line in doc.items:
         items.append({
@@ -108,7 +105,7 @@ def send_invoice_to_backend(doc, client_id, client_secret, access_log_id):
             "accessLogId": access_log_id,
             "items": items
         }
-    
+
 
     now = datetime.now(timezone.utc)
     timestamp = now.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
@@ -117,7 +114,7 @@ def send_invoice_to_backend(doc, client_id, client_secret, access_log_id):
         .quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
         .to_eng_string()
         )
-    
+
     payload = client_id + timestamp + normalized_amount + invoice_number
     signature = sign_payload(payload, client_secret)
 
@@ -131,18 +128,18 @@ def send_invoice_to_backend(doc, client_id, client_secret, access_log_id):
 
     try:
         r = requests.post(INVOICE_API_URL, json=body, headers=headers, timeout=30)
-        
+
         if r.status_code in (200, 201):
             frappe.logger().info(f"Invoice {invoice_number} sent to LodinPay successfully !!")
             return r.json()
-        
-        
+
+
         frappe.logger().error(f"Invoice API error {r.status_code}: {r.text}")
 
         try:
             error_data = r.json()
             error_msg = error_data.get("message") or error_data.get("error") or r.text
-        except:
+        except Exception:
             error_msg = r.text
 
         # ✅ Si la facture existe déjà, on retourne None silencieusement
@@ -151,28 +148,28 @@ def send_invoice_to_backend(doc, client_id, client_secret, access_log_id):
             return None
 
         frappe.throw(f"LodinPay API Error ({r.status_code}): {error_msg}")
-        
+
     except requests.exceptions.RequestException as e:
         frappe.logger().exception(f" Request failed for invoice {invoice_number}")
-        frappe.throw(f"Failed to connect to LodinPay: {str(e)}")
-    
+        frappe.throw(f"Failed to connect to LodinPay: {e!s}")
+
     return None
-    
+
 
 def send_invoice_pdf_to_backend(doc, backend_invoice_id):
-    
+
     # Credentials
     client_id = frappe.db.get_single_value("LodinPay Settings", "client_id")
     client_secret = frappe.db.get_single_value("LodinPay Settings", "client_secret")
     if not client_id or not client_secret:
         frappe.throw(_("LodinPay credentials are not configured. Please set them in LodinPay Settings."))
-    
+
 
     if not backend_invoice_id or backend_invoice_id == "{invoiceId}":
         frappe.logger().error(f"❌ ID Backend invalide : {backend_invoice_id}")
         return False
 
-    try: 
+    try:
         # PDF GENERATION
         frappe.logger().info(f"Generating PDF for invoice {doc.name}...")
 
@@ -186,30 +183,30 @@ def send_invoice_pdf_to_backend(doc, backend_invoice_id):
 
         pdf_base64 = base64.b64encode(pdf_bytes).decode("utf-8")
         frappe.logger().info(f"PDF encodé ({len(pdf_base64)} caractères)")
-        
+
         size_kb = len(pdf_base64) / 1024
         frappe.logger().info(f"PDF Taille Base64: {size_kb:.2f} KB")
-        
+
         if size_kb > 1000: # Si plus de 1Mo
             frappe.logger().warning("Le PDF est encore trop lourd pour LodinPay ?!!")
-   
+
     except Exception as e:
-        frappe.logger().error(f"Erreur génération PDF : {str(e)}")
-        return False    
+        frappe.logger().error(f"Erreur génération PDF : {e!s}")
+        return False
 
-    
 
-    
+
+
     body = {
         "fileName": f"Invoice_{doc.name}.pdf",
         "base64Pdf": pdf_base64
     }
-    
+
 
     external_invoice_id = doc.name.strip()
-    normalized_amount = "{:.2f}".format(float(doc.grand_total))
+    normalized_amount = f"{float(doc.grand_total):.2f}"
     timestamp = datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
-    
+
     payload = client_id.strip() + timestamp + normalized_amount + external_invoice_id
     signature = sign_payload(payload, client_secret.strip())
 
@@ -221,12 +218,12 @@ def send_invoice_pdf_to_backend(doc, backend_invoice_id):
         "X-Extension-Code": "ERPNEXT",
     }
 
-    
+
     # Api call
     url = f"{INVOICE_API_URL}/{backend_invoice_id}/pdf"
-    
-    # Time delay to ensure LodinPay backend has processed the invoice data before receiving the PDF 
-    time.sleep(1) 
+
+    # Time delay to ensure LodinPay backend has processed the invoice data before receiving the PDF
+    time.sleep(1)
 
     frappe.logger().info(f"Sending PDF to LodinPay for invoice {doc.name} (backend ID: {backend_invoice_id})...")
 
@@ -236,15 +233,15 @@ def send_invoice_pdf_to_backend(doc, backend_invoice_id):
         if r.status_code in (200, 201):
             frappe.logger().info(f"PDF for invoice {doc.name} sent to LodinPay successfully !!")
             return True
-        
+
         frappe.logger().error(f"PDF API error {r.status_code}: {r.text}")
-    except requests.exceptions.RequestException as e:
+    except requests.exceptions.RequestException:
         frappe.logger().exception(f"Failed to send PDF for invoice {doc.name} to LodinPay")
 
-    return False        
+    return False
 
 
-# Sync invoice status with LodinPay 
+# Sync invoice status with LodinPay
 @frappe.whitelist()
 def action_lodinpay_sync_status(invoice_names: str | list):
     if isinstance(invoice_names, str):
@@ -294,7 +291,7 @@ def action_lodinpay_sync_status(invoice_names: str | list):
             if r.status_code != 200:
                 try:
                     error_msg = r.json().get("message") or r.text
-                except:
+                except Exception:
                     error_msg = r.text
 
                 frappe.log_error(f"Invoice {invoice_name}: API Error {r.status_code} - {error_msg}", "LodinPay Sync Status")
@@ -310,9 +307,9 @@ def action_lodinpay_sync_status(invoice_names: str | list):
             else:
                 frappe.logger().info(f"Invoice {invoice_name} not updated. Payment status from LodinPay: {payment_status}")
 
-        except Exception as e:
+        except Exception:
             frappe.logger().exception(f"Error syncing status for invoice {invoice_name}")
-            
+
             continue
 
         frappe.db.commit() # nosemgrep - required after custom field installation
@@ -320,12 +317,12 @@ def action_lodinpay_sync_status(invoice_names: str | list):
     return True
 
 
-# Mark invoice as paid 
+# Mark invoice as paid
 def mark_invoice_paid(doc):
 
     if doc.status == "Paid":
         return
-    
+
     journal = frappe.db.get_value(
         "Account",
         filters={
@@ -334,7 +331,7 @@ def mark_invoice_paid(doc):
             "is_group": 0
         },
     )
-    
+
     if not journal:
         frappe.throw(_("No bank account found..."))
 
@@ -361,7 +358,7 @@ def mark_invoice_paid(doc):
                     "allocated_amount": doc.grand_total
                 }
             ]
-        })  
+        })
     payment.insert()
     payment.submit()
 
@@ -373,7 +370,7 @@ def mark_invoice_paid(doc):
 def sign_payload(payload, secret):
     """Signe le payload avec HMAC-SHA256"""
     raw_hmac = hmac.new(secret.encode("utf-8"), payload.encode("utf-8"), hashlib.sha256).digest()
-    
+
     return base64.b64encode(raw_hmac).decode("utf-8").replace("+", "-").replace("/", "_").rstrip("=")
 
 
@@ -383,7 +380,7 @@ def raise_backend_error(response, default_msg):
     try:
         data = response.json()
         msg = data.get("message") or data.get("error") or data.get("detail") or response.text
-    except:
+    except Exception:
         msg = response.text or default_msg
-    
+
     frappe.throw(f"LodinPay error ({response.status_code}): {msg}")
