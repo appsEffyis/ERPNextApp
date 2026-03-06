@@ -50,7 +50,7 @@ def on_submit(doc, method):
         backend_invoice_id = None
         try:
             invoice_response = send_invoice_to_backend(doc, client_id, client_secret, access_log_id)
-            backend_invoice_id = invoice_response.get("id")
+            backend_invoice_id = invoice_response.get("id") if invoice_response else None
         except (Exception, frappe.ValidationError) as e:
             if "already exists" in str(e).lower():
                 frappe.logger().info(f"Invoice {doc.name} already exists on LodinPay, skipping.")
