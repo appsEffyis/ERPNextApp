@@ -24,3 +24,4 @@ frappe-bench/apps/erpnext/
 
 # Logs Frappe
 frappe-bench/sites/*/logs/
+frappe-semgrep-rules/
