@@ -36,7 +36,7 @@ jobs:
         run: pip install frappe-bench
 
       - name: Init Bench
-        run: bench init --skip-redis-config-generation --skip-assets frappe-bench
+        run: bench init --skip-redis-config-generation --skip-assets --frappe-branch version-16 frappe-bench
 
       - name: Get Lodin App
         run: |
