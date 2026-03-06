@@ -11,13 +11,24 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
-      mysql:
+      # MariaDB est nécessaire pour la DB
+      mariadb:
         image: mariadb:10.6
         env:
           MYSQL_ROOT_PASSWORD: root
         ports:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
+      
+      # REDIS EST OBLIGATOIRE pour Frappe
+      redis-cache:
+        image: redis:6.2-alpine
+        ports:
+          - 6379:6379
+      redis-queue:
+        image: redis:6.2-alpine
+        ports:
+          - 6380:6379 # On décale le port pour éviter le conflit
 
     steps:
       - uses: actions/checkout@v4
@@ -25,30 +36,45 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.11" # Version recommandée pour v15
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
+      - name: Cache Pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml') }}
+
       - name: Install Bench
         run: pip install frappe-bench
 
       - name: Init Bench
-        run: bench init --skip-redis-config-generation --skip-assets --frappe-branch version-15 frappe-bench
+        run: |
+          bench init frappe-bench --skip-redis-config-generation --frappe-branch version-15 --python python3.11
+          cd frappe-bench
+          # Configurer bench pour utiliser les services redis du host
+          bench set-config -g redis_cache redis://localhost:6379
+          bench set-config -g redis_queue redis://localhost:6380
 
-      - name: Get Lodin App
+      - name: Get Apps
         run: |
           cd frappe-bench
+          bench get-app --branch version-15 erpnext
           bench get-app lodin ${{ github.workspace }}
 
       - name: Setup Site
         run: |
           cd frappe-bench
+          # Utilisation de 127.0.0.1 pour MariaDB dans GitHub Actions
           bench new-site lodin.localhost \
+            --db-host 127.0.0.1 \
             --mariadb-root-password root \
-            --admin-password admin
+            --admin-password admin \
+            --no-mariadb-socket
           bench --site lodin.localhost install-app lodin
 
       - name: Run Tests
