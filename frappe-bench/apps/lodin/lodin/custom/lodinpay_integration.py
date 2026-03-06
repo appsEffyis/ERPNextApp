@@ -138,15 +138,18 @@ def send_invoice_to_backend(doc, client_id, client_secret, access_log_id):
         
         
         frappe.logger().error(f"Invoice API error {r.status_code}: {r.text}")
-        
-        
+
         try:
             error_data = r.json()
             error_msg = error_data.get("message") or error_data.get("error") or r.text
-       
         except:
             error_msg = r.text
-        
+
+        # ✅ Si la facture existe déjà, on retourne None silencieusement
+        if "already exists" in error_msg.lower():
+            frappe.logger().info(f"Invoice {invoice_number} already exists on LodinPay, skipping silently.")
+            return None
+
         frappe.throw(f"LodinPay API Error ({r.status_code}): {error_msg}")
         
     except requests.exceptions.RequestException as e:
