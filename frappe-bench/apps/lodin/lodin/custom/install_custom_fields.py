@@ -5,6 +5,7 @@ Installation of custom fields for LodinPay
 import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 
+
 def install():
     """
     Crée les custom fields au démarrage de l'app
@@ -32,11 +33,11 @@ def install():
             }
         ]
     }
-    
+
     create_custom_fields(custom_fields, update=True)
     set_default_print_format()
     frappe.db.commit() # nosemgrep - required after custom field installation
-    
+
     print("✅ LodinPay custom fields created successfully!")
 
 
