@@ -67,15 +67,20 @@ jobs:
           bench get-app lodin ${{ github.workspace }}
 
       - name: Setup Site
-        run: |
-          cd frappe-bench
-          # Utilisation de 127.0.0.1 pour MariaDB dans GitHub Actions
-          bench new-site lodin.localhost \
-            --db-host 127.0.0.1 \
-            --mariadb-root-password root \
-            --admin-password admin \
-            --no-mariadb-socket
-          bench --site lodin.localhost install-app lodin
+              run: |
+                cd frappe-bench
+                # Création du site
+                bench new-site lodin.localhost \
+                  --db-host 127.0.0.1 \
+                  --mariadb-root-password root \
+                  --admin-password admin \
+                  --no-mariadb-socket
+                
+                # 1. INSTALLER ERPNEXT EN PREMIER (Indispensable pour avoir Sales Invoice)
+                bench --site lodin.localhost install-app erpnext
+                
+                # 2. INSTALLER LODIN ENSUITE
+                bench --site lodin.localhost install-app lodin
 
       - name: Run Tests
         run: |
